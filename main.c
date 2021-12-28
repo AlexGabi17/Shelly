@@ -43,8 +43,10 @@ int xhelp(char *comanda) {
     printf("xclear: delete shown terminal history \n");
   else if (strcmp(comanda, "xcd") == 0)
     printf("xcd: change directory\n");
+  else if (strcmp(comanda, "xecho") == 0)
+    printf("xecho: desplay buffer to console or given file\n");
   else if (strcmp(comanda, "xcp") == 0)
-    printf("xcp: copy file in another file\n");
+    printf("xcp: copy file content in another file\n");
   else if (strcmp(comanda, "pwd") == 0)
     printf("xpwd: current path\n");
   else if (strcmp(comanda, "mkdir") == 0)
@@ -70,6 +72,7 @@ int xhelp(char *comanda) {
     printf("xclear:     deletes \n");
     printf("xcd:        change directory\n");
     printf("xcp:        copy file content in another file\n");
+    printf("xecho: desplay buffer to console or given file\n");
     printf("xpwd:       current path\n");
     printf("xls:        show all files in current directory\n");
     printf("xhistory:   shows all comands used so far  \n");
@@ -227,6 +230,52 @@ int xcp(char *file1, char *file2)
   close(fd2);
   return 0;
 }
+
+//---------------------- ECHO----------------------------------
+
+
+int xecho ( char * comanda)
+{
+    int count=0,i=0;
+    int index=1;
+    for(i;i<strlen(comanda);i++)
+        {
+            if ('>'==comanda[i])
+            {
+                index=i;
+                count++;
+            }
+            if (count>1)
+                {   char * const ms1="prea multe >\n";
+                        write(2,ms1,strlen(ms1));
+                    return -1;
+                }}
+        if (count==1)        
+       { if (index==strlen(comanda)-1)
+        {char * const ms2="nu ati indicat destinatia\n";
+                        write(2,ms2,strlen(ms2));
+                    return -1;}
+        char *src=(char *)malloc(index);
+        char *dest=(char *) malloc(strlen(comanda)-index);
+        strncpy(src, comanda,index);
+        strncpy(dest, comanda+index+1,strlen(comanda)-index);
+        int fd=open(dest, O_RDWR| O_CREAT, S_IRUSR|S_IWUSR);
+        if(fd < 0)
+            {
+                perror("eroare la crearea fisierului\n");
+                return errno;
+            }
+        write(fd,src,strlen(src));    
+       }
+       else 
+       {
+           write(1,comanda,strlen(comanda));
+           write(1,"\n",1);
+          
+       }
+    
+    return 0;
+}
 //------------------------cd-------------------------
 int xcd(char *name) {
   if (chdir(name) != 0) {
@@ -347,7 +396,10 @@ int main(int argc, char *argv[]) {
       exec_func = false;
     } else if (strcmp(argx, "xls") == 0) {
       xls(path);
-    } else if (strcmp(argx, "xcd") == 0) {
+    } 
+    else if (strcmp(argx, "xecho") == 0) {
+      xecho(parametru);
+    }else if (strcmp(argx, "xcd") == 0) {
       // argx = strtok(NULL, " \n");
       if (xcd(parametru) != errno) {
         exec_func = false; // ???????????
